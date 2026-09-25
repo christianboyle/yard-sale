@@ -3,14 +3,7 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-const defaultAllowedHosts = [
-  "ysg.christianboyle.com",
-  "local.wesbos.com",
-  "desktop-ngpp4sj.tail79512.ts.net",
-  ".tail79512.ts.net",
-];
-
-const extraAllowedHosts =
+const allowedHosts =
   process.env.VITE_ALLOWED_HOSTS?.split(",")
     .map((host) => host.trim())
     .filter(Boolean) ?? [];
@@ -22,7 +15,7 @@ export default defineConfig({
     strictPort: true,
     // Funnel can't relay Vite's HMR WebSocket; a broken socket reloads Safari on mobile.
     hmr: false,
-    allowedHosts: [...new Set([...defaultAllowedHosts, ...extraAllowedHosts])],
+    ...(allowedHosts.length > 0 ? { allowedHosts } : {}),
   },
   plugins: [
     react(),

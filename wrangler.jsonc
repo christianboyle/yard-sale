@@ -3,7 +3,8 @@
   "name": "yard-sale-gold",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-08-24",
-  "routes": [{ "pattern": "ysg.christianboyle.com", "custom_domain": true }],
+  // For Cloudflare Workers deploy only (not used by Docker self-hosting):
+  // "routes": [{ "pattern": "your-domain.example.com", "custom_domain": true }],
   "assets": {
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*"]

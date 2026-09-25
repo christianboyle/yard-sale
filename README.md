@@ -7,35 +7,59 @@ An installable browser/PWA scanner that samples frames from a live camera or upl
 - React 19 + Vite + TypeScript
 - TanStack Router for URL-driven navigation and TanStack Query for server-state caching
 - Cloudflare Workers and the Cloudflare Vite plugin
-- OpenAI Agents SDK with `gpt-5.6-luna`
+- OpenAI Agents SDK with `gpt-5.6-luna` (OpenAI or OpenRouter keys supported)
 - Drizzle ORM + Cloudflare D1
 - Cloudflare R2 thumbnails
 - Vite PWA service worker and manifest
 
 ## Run locally
 
-1. Copy `.dev.vars.example` to `.dev.vars` and replace the placeholder:
+1. Copy `.dev.vars.example` to `.dev.vars` and set your API key:
 
    ```dotenv
    OPENAI_API_KEY=your_real_project_key
    ```
 
-2. The checked-in `wrangler.jsonc` targets the author's Cloudflare resources and uses remote D1/R2 bindings. For local development, remove `remote: true` from both bindings. Install dependencies and apply local D1 migrations:
+2. Install dependencies and apply local D1 migrations:
 
    ```bash
    npm install
    npm run db:migrate:local
    ```
 
-3. Start the app:
+3. Start the dev server:
 
    ```bash
    npm run dev
    ```
 
-4. Open `http://127.0.0.1:5173`. Select a camera for live scanning or snapshots, or upload a photo/video. You can keep your own garage-sale clips in the ignored local `yard-sale-footage/` folder; footage is not included in this repository.
+4. Open `http://127.0.0.1:5174/scan`. Select a camera for live scanning or snapshots, or upload a photo/video. You can keep garage-sale clips in the ignored local `yard-sale-footage/` folder; footage is not included in this repository.
 
 The browser samples compressed frames at a configurable 1–30 second interval and allows up to 100 analyses in flight. Frame images are not bundled with the app.
+
+### Dev over Tailscale or a tunnel
+
+If you access the Vite dev server through another hostname, add it to a local `.env` file:
+
+```dotenv
+VITE_ALLOWED_HOSTS=your-hostname.example.com,.tailscale.net
+```
+
+## Docker (incl. Synology)
+
+```bash
+cp .env.example .env   # add OPENAI_API_KEY
+docker compose up -d --build
+# → http://localhost:5174   (health: /api/health)
+```
+
+On a Synology (Container Manager / DSM 7.2+):
+
+1. Clone this repo to the NAS (e.g. `/volume1/docker/yard-sale-gold`).
+2. Create a project from `docker-compose.yml`.
+3. Set `OPENAI_API_KEY` in the project environment (or in a `.env` file next to the compose file).
+4. Expose host port **5174**. Change only the left side of `"5174:5174"` if needed.
+5. For HTTPS + a custom domain: DSM **Reverse Proxy** → forward the hostname to `localhost:5174`.
 
 ## Routes and state
 
@@ -51,9 +75,11 @@ TanStack Query owns remote stats and inventory data. Camera streams, capture tim
 ```bash
 npm test                 # deterministic unit tests
 npm run build            # type-check and production build
+npm run dev:fresh        # kill stale dev server, migrate, restart
 npm run cf-typegen       # regenerate Worker binding types
 npm run db:generate      # generate a migration after schema changes
 npm run db:migrate:local # apply migrations to local D1
+npm run docker:up        # build and start Docker stack
 ```
 
 ## Agent workflow
@@ -70,6 +96,14 @@ Each frame starts one bounded agent run. The agent:
 
 The UI reports cumulative frames processed, items identified, searches performed, and underlying model calls. See [FEATURES.md](./FEATURES.md) for live-feed tracking, natural-language filters, eBay integration, and batch processing.
 
-## Cloud deployment
+## Cloudflare Workers deploy
 
-Before deploying your own instance, create a D1 database and R2 bucket, replace the resource names and D1 ID in `wrangler.jsonc`, and replace or remove the author's custom domain in `routes`. Apply remote migrations and set `OPENAI_API_KEY` with `wrangler secret put OPENAI_API_KEY`.
+Docker self-hosting uses local D1/R2 bindings in `wrangler.jsonc` and does not need Cloudflare routes.
+
+To deploy to Cloudflare Workers instead:
+
+1. Create a D1 database and R2 bucket in your Cloudflare account.
+2. Update `database_id`, bucket names, and add a `routes` entry for your custom domain in `wrangler.jsonc`.
+3. Apply remote migrations: `npm run db:migrate:remote`
+4. Set secrets: `wrangler secret put OPENAI_API_KEY`
+5. Deploy: `npm run deploy`
