@@ -39,16 +39,20 @@ The browser samples compressed frames at a configurable 1–30 second interval a
 
 ### Dev over Tailscale or a tunnel
 
-If you access the Vite dev server through another hostname, add it to a local `.env` file:
+If you access the Vite dev server through another hostname, copy `.env.example` to `.env` and set:
 
 ```dotenv
 VITE_ALLOWED_HOSTS=your-hostname.example.com,.tailscale.net
 ```
 
+API keys stay in `.dev.vars`, not `.env`.
+
 ## Docker (incl. Synology)
 
+Uses the same `.dev.vars` file as local development:
+
 ```bash
-cp .env.example .env   # add OPENAI_API_KEY
+cp .dev.vars.example .dev.vars   # add OPENAI_API_KEY
 docker compose up -d --build
 # → http://localhost:5174   (health: /api/health)
 ```
@@ -56,8 +60,8 @@ docker compose up -d --build
 On a Synology (Container Manager / DSM 7.2+):
 
 1. Clone this repo to the NAS (e.g. `/volume1/docker/yard-sale-gold`).
-2. Create a project from `docker-compose.yml`.
-3. Set `OPENAI_API_KEY` in the project environment (or in a `.env` file next to the compose file).
+2. Copy `.dev.vars.example` to `.dev.vars` and add your API key.
+3. Create a project from `docker-compose.yml` (or set `OPENAI_API_KEY` in the project environment instead of using a file).
 4. Expose host port **5174**. Change only the left side of `"5174:5174"` if needed.
 5. For HTTPS + a custom domain: DSM **Reverse Proxy** → forward the hostname to `localhost:5174`.
 

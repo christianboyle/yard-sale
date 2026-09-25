@@ -2,7 +2,7 @@
 set -e
 
 if [ -z "${OPENAI_API_KEY:-}" ]; then
-  echo "Missing OPENAI_API_KEY. Copy .env.example to .env and set your key."
+  echo "Missing OPENAI_API_KEY. Copy .dev.vars.example to .dev.vars and set your key."
   exit 1
 fi
 

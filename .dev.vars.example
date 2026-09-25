@@ -1,3 +1,7 @@
-# Copy to .dev.vars and replace the placeholder.
+# Copy to `.dev.vars` and replace the placeholder.
+# Used by Wrangler (`npm run dev`) and Docker Compose (`docker compose up`).
 # Use an OpenAI key (sk-...) or OpenRouter key (sk-or-v1-...).
 OPENAI_API_KEY=your_openai_api_key_here
+
+# Optional — defaults to gpt-5.6-luna in wrangler.jsonc
+# OPENAI_MODEL=gpt-5.6-luna
