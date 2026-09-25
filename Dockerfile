@@ -3,8 +3,9 @@
 FROM node:22-bookworm-slim
 
 WORKDIR /app
-ENV NODE_ENV=production
 ENV PORT=5174
+# NODE_ENV=production is set in docker-compose.yml at runtime.
+# Do not set it here — npm ci would skip devDependencies (tsc, vite, wrangler).
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends ca-certificates tini \
