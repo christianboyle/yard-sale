@@ -1,2 +1,3 @@
-# Copy to .dev.vars and replace the placeholder with your OpenAI project key.
+# Copy to .dev.vars and replace the placeholder.
+# Use an OpenAI key (sk-...) or OpenRouter key (sk-or-v1-...).
 OPENAI_API_KEY=your_openai_api_key_here

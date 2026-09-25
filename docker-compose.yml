@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    container_name: yard-sale-gold
+    # host:container — 5174 is the standardized port (change the LEFT side if it
+    # collides with another container on the Synology).
+    ports:
+      - "5174:5174"
+    # Configuration. In Synology Container Manager edit these in the project's
+    # YAML — replace ${OPENAI_API_KEY:-} with your real key, e.g.
+    #     - OPENAI_API_KEY=sk-or-v1-xxxx
+    # Locally, the ${VAR} forms auto-fill from a .env next to this compose.
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-5.6-luna}
+      - NODE_ENV=production
+      - PORT=5174
+    volumes:
+      - wrangler-state:/app/.wrangler
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:5174/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  wrangler-state:

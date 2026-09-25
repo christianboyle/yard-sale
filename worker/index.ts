@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/d1";
 import type { AgentRunEvent, AgentRunHistory, AnalysisResponse, Comparable, DetectedItem, HistoryPage, Stats } from "../src/types";
 import { HISTORY_PAGE_SIZE, HistoryQueryError, historyQuery } from "./history";
 import { AGENT_INSTRUCTIONS, analyzeFrame, buildAgentInputText } from "./agent";
+import { createModelProvider, resolveModelName } from "./lib/openai";
 import { appStats, frameRuns, items, scanSessions, valuationSources } from "./db/schema";
 import { fingerprintSimilarity, normalizeFingerprint } from "./normalize";
 
@@ -143,14 +144,15 @@ async function analyzeRequest(request: Request, env: Env): Promise<Response> {
     httpMetadata: { contentType: image.type, cacheControl: "private, max-age=31536000, immutable" },
   });
 
+  const provider = createModelProvider(env.OPENAI_API_KEY);
   try {
     const result = await analyzeFrame({
-      apiKey: env.OPENAI_API_KEY,
-      model: env.OPENAI_MODEL,
+      model: resolveModelName(env.OPENAI_MODEL, env.OPENAI_API_KEY),
       imageDataUrl,
       db,
       sessionId,
       findCriteria,
+      provider,
       ebayCredentials:
         env.EBAY_CLIENT_ID && env.EBAY_CLIENT_SECRET
           ? { clientId: env.EBAY_CLIENT_ID, clientSecret: env.EBAY_CLIENT_SECRET }

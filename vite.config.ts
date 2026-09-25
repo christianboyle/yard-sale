@@ -3,14 +3,32 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
+const defaultAllowedHosts = [
+  "ysg.christianboyle.com",
+  "local.wesbos.com",
+  "desktop-ngpp4sj.tail79512.ts.net",
+  ".tail79512.ts.net",
+];
+
+const extraAllowedHosts =
+  process.env.VITE_ALLOWED_HOSTS?.split(",")
+    .map((host) => host.trim())
+    .filter(Boolean) ?? [];
+
 export default defineConfig({
   server: {
-    allowedHosts: ["local.wesbos.com"],
+    host: true,
+    port: 5174,
+    strictPort: true,
+    // Funnel can't relay Vite's HMR WebSocket; a broken socket reloads Safari on mobile.
+    hmr: false,
+    allowedHosts: [...new Set([...defaultAllowedHosts, ...extraAllowedHosts])],
   },
   plugins: [
     react(),
     cloudflare(),
     VitePWA({
+      devOptions: { enabled: false },
       registerType: "autoUpdate",
       manifest: {
         name: "Yard Sale Gold",
@@ -26,6 +44,7 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/api\//],
         globPatterns: ["**/*.{js,css,html,svg,woff2}"],
       },
     }),

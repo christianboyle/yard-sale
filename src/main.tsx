@@ -6,7 +6,9 @@ import { registerSW } from "virtual:pwa-register";
 import { router } from "./router";
 import "./styles.css";
 
-registerSW({ immediate: true });
+if (import.meta.env.PROD) {
+  registerSW({ immediate: true });
+}
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: { staleTime: 15_000, refetchOnWindowFocus: false },

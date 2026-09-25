@@ -1,0 +1,11 @@
+node_modules
+dist
+.wrangler
+.git
+.env
+.env.local
+.dev.vars
+*.log
+.DS_Store
+yard-sale-footage
+**/*.tsbuildinfo

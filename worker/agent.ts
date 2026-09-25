@@ -104,14 +104,15 @@ Apply these inclusion rules before calling tools or searching the web. Do not in
 Return an empty items array when no object passes every inclusion rule. Currency defaults to USD unless a visible tag or source clearly indicates otherwise.`;
 
 export async function analyzeFrame(options: {
-  apiKey: string;
   model: string;
   imageDataUrl: string;
   db: AgentDb;
   sessionId: string;
   findCriteria: string;
   ebayCredentials?: EbayCredentials;
+  provider: OpenAIProvider;
 }): Promise<{ analysis: FrameAnalysis; modelCalls: number; searchesPerformed: number; audit: AgentRunAudit }> {
+  const model = options.model;
   const inputText = buildAgentInputText(options.findCriteria);
   const checkPreviousScans = tool({
     name: "check_previous_scans",
@@ -177,7 +178,7 @@ export async function analyzeFrame(options: {
 
   const agent = new Agent({
     name: "Yard Sale Gold Scout",
-    model: "gpt-5.6-luna",
+    model,
     instructions: AGENT_INSTRUCTIONS,
     tools: [
       checkPreviousScans,
@@ -187,8 +188,7 @@ export async function analyzeFrame(options: {
     outputType: frameAnalysisSchema,
   });
 
-  const provider = new OpenAIProvider({ apiKey: options.apiKey });
-  const runner = new Runner({ modelProvider: provider });
+  const runner = new Runner({ modelProvider: options.provider });
   const result = await runner.run(
     agent,
     [
@@ -203,7 +203,7 @@ export async function analyzeFrame(options: {
         ],
       },
     ],
-  ).finally(() => provider.close());
+  ).finally(() => options.provider.close());
 
   if (!result.finalOutput) {
     throw new Error("Luna completed without structured output.");
@@ -284,3 +284,4 @@ function runItemTitle(type: string, data: unknown): string {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
+

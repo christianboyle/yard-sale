@@ -304,7 +304,13 @@ export default function App({ children }: { children?: React.ReactNode }) {
         }
         setError(null);
       } catch (frameError) {
-        setError(frameError instanceof Error ? frameError.message : "Frame analysis failed");
+        const message =
+          frameError instanceof TypeError
+            ? "Connection dropped while analyzing — keep this tab open and try again."
+            : frameError instanceof Error
+              ? frameError.message
+              : "Frame analysis failed";
+        setError(message);
       } finally {
         inFlightRef.current -= 1;
         setInFlight(inFlightRef.current);
