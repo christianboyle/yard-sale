@@ -12,7 +12,11 @@ OPENAI_API_KEY=${OPENAI_API_KEY}
 OPENAI_MODEL=${OPENAI_MODEL:-gpt-5.6-luna}
 EOF
 
-npm run db:migrate:local
+# Migrations must use the same wrangler config as the running server.
+# Applying against the root wrangler.jsonc targets a different local D1 file.
+npx wrangler d1 migrations apply yard-sale-gold-db \
+  --local \
+  --config dist/yard_sale_gold/wrangler.json
 
 exec npx wrangler dev \
   --config dist/yard_sale_gold/wrangler.json \
