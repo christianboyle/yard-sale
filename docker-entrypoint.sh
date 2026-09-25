@@ -6,11 +6,14 @@ if [ -z "${OPENAI_API_KEY:-}" ]; then
   exit 1
 fi
 
-# Wrangler reads secrets from .dev.vars during local dev.
-cat > .dev.vars <<EOF
+# Wrangler loads .dev.vars from the config file's directory, not the repo root.
+DEV_VARS="dist/yard_sale_gold/.dev.vars"
+mkdir -p "$(dirname "$DEV_VARS")"
+cat > "$DEV_VARS" <<EOF
 OPENAI_API_KEY=${OPENAI_API_KEY}
 OPENAI_MODEL=${OPENAI_MODEL:-gpt-5.6-luna}
 EOF
+cp "$DEV_VARS" .dev.vars
 
 # Migrations must use the same wrangler config as the running server.
 # Applying against the root wrangler.jsonc targets a different local D1 file.
